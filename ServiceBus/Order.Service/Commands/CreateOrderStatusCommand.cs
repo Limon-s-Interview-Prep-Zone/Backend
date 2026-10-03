@@ -1,4 +1,3 @@
-﻿namespace Order.Service.Commands
-{
-    public record CreateOrderStatusCommand(string OrderId);
-}
+namespace Order.Service.Commands;
+
+public record CreateOrderStatusCommand(string OrderId);
