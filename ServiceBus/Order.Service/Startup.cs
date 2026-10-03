@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Order.Service.Consumers;
+using RabbitMQ.Client;
 
 namespace Order.Service;
 
@@ -56,7 +57,29 @@ public class Startup
                     r.Interval(3, TimeSpan.FromSeconds(2));
                 });
 
-                // Automatically configure receive endpoints for all registered consumers
+                // ====================================================================
+                // PUBLISH TOPOLOGY FOR DIFFERENT EXCHANGE TYPES
+                // ====================================================================
+
+                // Direct Exchange: Exact routing key matching ("email" or "sms")
+                config.Publish<SendNotificationEvent>(p =>
+                {
+                    p.ExchangeType = ExchangeType.Direct;
+                });
+
+                // Topic Exchange: Pattern routing with wildcards (* and #)
+                config.Publish<PaymentProcessedEvent>(p =>
+                {
+                    p.ExchangeType = ExchangeType.Topic;
+                });
+
+                // Headers Exchange: Attribute-based routing on AMQP headers
+                config.Publish<DocumentProcessedEvent>(p =>
+                {
+                    p.ExchangeType = ExchangeType.Headers;
+                });
+
+                // Automatically configure receive endpoints for all registered consumers (Fanout)
                 config.ConfigureEndpoints(context);
             });
         });
