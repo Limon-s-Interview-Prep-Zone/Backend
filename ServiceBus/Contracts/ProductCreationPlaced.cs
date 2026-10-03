@@ -1,6 +1,3 @@
-﻿using System;
+namespace Contracts;
 
-namespace Contracts
-{
-    public record ProductCreationPlaced(int Id, string Code, string ProductName);
-}
+public record ProductCreationPlaced(int Id, string Code, string ProductName);

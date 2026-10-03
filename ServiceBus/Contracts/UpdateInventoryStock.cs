@@ -1,4 +1,3 @@
-namespace Contracts
-{
-    public record UpdateInventoryStock(int OrderId, string ProductName, int Quantity);
-}
+namespace Contracts;
+
+public record UpdateInventoryStock(int OrderId, string ProductName, int Quantity);
