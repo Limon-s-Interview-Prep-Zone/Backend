@@ -45,3 +45,9 @@ Welcome to the comprehensive MassTransit theoretical and architectural documenta
    - Direct Exchange (Exact RoutingKey matching for SMS/Email)
    - Topic Exchange (Pattern matching with `*` and `#` wildcards for Payment/Fraud)
    - Headers Exchange (AMQP Header attribute routing for Enterprise tiers)
+
+7. [07. Broker Binding Lifecycle & Full Workflow Guide](file:///Users/limon/interview/Backend/docs/07-rabbitmq-broker-binding-lifecycle-workflow.md)
+   - Two-Tier Exchange Model (Exchange-to-Exchange Binding architecture)
+   - Sequential Startup Timeline (`queue.declare`, `exchange.declare`, `exchange.bind`)
+   - How `ConfigureConsumeTopology = false` and `e.Bind<T>` work
+   - Runtime routing execution flow (English & বাংলা)
