@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Contracts;
+using GreenPipes;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Order.Service.Consumers;
 
@@ -26,51 +21,54 @@ namespace Order.Service
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
 
+            // STEP 1: Add and configure MassTransit
             services.AddMassTransit(x =>
             {
+                // Register Consumers
                 x.AddConsumer<OrderPlacedConsumer>();
                 x.AddConsumer<CheckOrderStatusConsumer>();
-                    // .Endpoint(e => e.Name = "check-order-status");
+
+                // Register Request Client for Request-Response RPC pattern
                 x.AddRequestClient<CheckOrderStatus>();
-                    // (new Uri("exchange:check-order-status"));
-                
-                x.UsingRabbitMq((context,config) =>
+
+                // Configure RabbitMQ Transport
+                x.UsingRabbitMq((context, config) =>
                 {
-                    config.Host("localhost","/", c =>
+                    var rabbitHost = Configuration.GetValue<string>("RabbitMq:Host") ?? "localhost";
+                    var rabbitUser = Configuration.GetValue<string>("RabbitMq:Username") ?? "guest";
+                    var rabbitPass = Configuration.GetValue<string>("RabbitMq:Password") ?? "guest";
+
+                    config.Host(rabbitHost, "/", c =>
                     {
-                        c.Username("guest");
-                        c.Password("guest");
+                        c.Username(rabbitUser);
+                        c.Password(rabbitPass);
                     });
-                    // config.ReceiveEndpoint("queue:order-placed", e =>
-                    // {
-                    //     e.Consumer<OrderPlacedConsumer>(context);
-                    // });
-                    //
-                    // config.ReceiveEndpoint("check-order-status", e =>
-                    // {
-                    //     e.Consumer<CheckOrderStatusConsumer>(context);
-                    // });
-                    //
+
+                    // STEP 2: Configure Retry Policy (Resilience)
+                    config.UseMessageRetry(r =>
+                    {
+                        // Retry 3 times with 2 seconds interval between retries
+                        r.Interval(3, TimeSpan.FromSeconds(2));
+                    });
+
+                    // Automatically configure receive endpoints for all registered consumers
                     config.ConfigureEndpoints(context);
                 });
-                
             });
 
+            // Hosted service to start/stop the bus with ASP.NET Core lifecycle
             services.AddMassTransitHostedService();
-            
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Order.Service", Version = "v1" });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -81,9 +79,7 @@ namespace Order.Service
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

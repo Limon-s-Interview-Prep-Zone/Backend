@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Contracts;
 using Inventory.Service.Commands;
 using MassTransit;
-using MassTransit.RabbitMqTransport.Integration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -23,11 +22,13 @@ namespace Inventory.Service.Controllers
 
         [HttpPost]
         [Route("CreateProduct")]
-        public Task<string> CreateProductCommand([FromBody] CreateProductCommand command)
+        public async Task<IActionResult> CreateProductCommand([FromBody] CreateProductCommand command)
         {
-            _publisher.Publish<ProductCreationPlaced>(new ProductCreationPlaced(command.Id, command.Code,
-                command.ProductName));
-            return Task.FromResult("Successful");
+            _logger.LogInformation("Publishing ProductCreationPlaced for product ID: {Id}", command.Id);
+
+            await _publisher.Publish(new ProductCreationPlaced(command.Id, command.Code, command.ProductName));
+
+            return Ok(new { Message = "ProductCreationPlaced event published successfully", command.Id });
         }
     }
 }

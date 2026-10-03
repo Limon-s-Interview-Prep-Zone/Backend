@@ -1,18 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Contracts;
+using GreenPipes;
 using Inventory.Service.Consumers;
 using MassTransit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace Inventory.Service
@@ -26,39 +20,56 @@ namespace Inventory.Service
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
-            services.AddMassTransit(x=>
-            {
-                x.AddConsumer<InventoryManagementConsumer>();
-                x.UsingRabbitMq((ctx,cfg)=>{
 
-                    cfg.Host("localhost","/" , c=>
+            // STEP 1: Add MassTransit and register consumers
+            services.AddMassTransit(x =>
+            {
+                // Register Consumers
+                x.AddConsumer<InventoryManagementConsumer>();
+                x.AddConsumer<InventoryStockUpdateConsumer>();
+                x.AddConsumer<OrderPlacedInventoryConsumer>();
+
+                // Configure RabbitMQ Transport
+                x.UsingRabbitMq((ctx, cfg) =>
+                {
+                    var rabbitHost = Configuration.GetValue<string>("RabbitMq:Host") ?? "localhost";
+                    var rabbitUser = Configuration.GetValue<string>("RabbitMq:Username") ?? "guest";
+                    var rabbitPass = Configuration.GetValue<string>("RabbitMq:Password") ?? "guest";
+
+                    cfg.Host(rabbitHost, "/", c =>
                     {
-                        c.Username("guest");
-                        c.Password("guest");
+                        c.Username(rabbitUser);
+                        c.Password(rabbitPass);
                     });
-                    
-                    cfg.ReceiveEndpoint("Queue:update-product-stock", e =>
+
+                    // STEP 2: Configure Retry Policy (Resilience)
+                    cfg.UseMessageRetry(r =>
                     {
-                        e.Consumer<InventoryManagementConsumer>(ctx);
+                        r.Interval(3, TimeSpan.FromSeconds(2));
                     });
-                    
-                    // cfg.ConfigureEndpoints(ctx);
+
+                    // Explicit receive endpoint for the point-to-point command queue
+                    cfg.ReceiveEndpoint("inventory-stock-update", e =>
+                    {
+                        e.ConfigureConsumer<InventoryStockUpdateConsumer>(ctx);
+                    });
+
+                    // Automatically configure remaining endpoints (events)
+                    cfg.ConfigureEndpoints(ctx);
                 });
             });
+
             services.AddMassTransitHostedService();
-            
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Inventory.Service", Version = "v1" });
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -69,9 +80,7 @@ namespace Inventory.Service
             }
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
