@@ -66,3 +66,10 @@ Welcome to the comprehensive MassTransit theoretical and architectural documenta
    - Request/Response (`IRequestClient<T>`), Scheduling (`IMessageScheduler`), and Deferral (`context.Defer`)
    - Routing Slips orchestration (`RoutingSlipBuilder`)
    - The Golden Rule: Inside vs Outside Consumer Context (Transactional Outbox & Tracing)
+
+10. [10. OpenTelemetry Distributed Tracing & Metrics Guide](./10-opentelemetry-distributed-tracing-guide.md)
+   - The "Why": Solving the distributed observability black hole in message brokers
+   - How MassTransit instruments Spans and W3C `traceparent` headers
+   - Sequence diagram of cross-service trace propagation
+   - Production implementation pattern in .NET 6 (`AddSource("MassTransit")`)
+   - MassTransit metrics (`AddMeter("MassTransit")`) and full OTel Collector architecture (English & বাংলা)
