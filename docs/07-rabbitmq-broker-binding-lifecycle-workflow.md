@@ -12,14 +12,14 @@ In native RabbitMQ, developers typically bind an Exchange directly to a Queue. *
 
 ```mermaid
 flowchart TD
-    Producer["Producer Application<br/>(_publisher.Publish)"] --> Tier1["Tier 1: Message Type Exchange<br/>'Contracts:OrderPlaced' (fanout)"]
+    Producer["Producer Application (_publisher.Publish)"] --> Tier1["Tier 1: Message Type Exchange<br/>Contracts:OrderPlaced (fanout)"]
 
-    subgraph RabbitMQ Broker
-        Tier1 -->|"Exchange-to-Exchange (E2E)"| Tier2A["Tier 2: Endpoint Exchange<br/>'inventory-order-placed' (fanout)"]
-        Tier1 -->|"Exchange-to-Exchange (E2E)"| Tier2B["Tier 2: Endpoint Exchange<br/>'notification-order-placed' (fanout)"]
+    subgraph RabbitMQ_Broker ["RabbitMQ Broker"]
+        Tier1 -->|"Exchange-to-Exchange (E2E)"| Tier2A["Tier 2: Endpoint Exchange<br/>inventory-order-placed (fanout)"]
+        Tier1 -->|"Exchange-to-Exchange (E2E)"| Tier2B["Tier 2: Endpoint Exchange<br/>notification-order-placed (fanout)"]
 
-        Tier2A -->|"Exchange-to-Queue (E2Q)"| QueueA[("Tier 3: Physical Queue<br/>'inventory-order-placed'")]
-        Tier2B -->|"Exchange-to-Queue (E2Q)"| QueueB[("Tier 3: Physical Queue<br/>'notification-order-placed'")]
+        Tier2A -->|"Exchange-to-Queue (E2Q)"| QueueA[("Tier 3: Physical Queue<br/>inventory-order-placed")]
+        Tier2B -->|"Exchange-to-Queue (E2Q)"| QueueB[("Tier 3: Physical Queue<br/>notification-order-placed")]
     end
 
     QueueA -->|"basic.consume"| ConsumerA["Inventory.Service Consumer"]
@@ -43,13 +43,13 @@ If you receive 3 different types of mail, they are all routed to **Your Apartmen
 
 ```mermaid
 flowchart LR
-    subgraph Naive 1-Tier Model (Problematic)
+    subgraph Naive_1_Tier ["Naive 1-Tier Model (Problematic)"]
         Ex1["Exchange: OrderPlaced"] --> Q1[("Queue: inventory-service")]
         Ex2["Exchange: OrderCancelled"] --> Q1
         Ex3["Exchange: StockRestocked"] --> Q1
     end
 
-    subgraph MassTransit 2-Tier Model (Decoupled & Flexible)
+    subgraph MassTransit_2_Tier ["MassTransit 2-Tier Model (Decoupled & Flexible)"]
         T1A["Contracts:OrderPlaced"] --> T2["inventory-service (Exchange)"]
         T1B["Contracts:OrderCancelled"] --> T2
         T1C["Contracts:StockRestocked"] --> T2
@@ -76,7 +76,7 @@ public record OrderPlaced(int OrderId) : IAuditLog, ICustomerNotification;
 flowchart TD
     OrderPlacedPub["Publisher: OrderPlaced"] --> ExOrder["Exchange: Contracts:OrderPlaced"]
 
-    subgraph Polymorphic Exchange Hierarchy (E2E)
+    subgraph Polymorphic_Hierarchy ["Polymorphic Exchange Hierarchy (E2E)"]
         ExOrder -->|"E2E Binding"| ExAudit["Exchange: Contracts:IAuditLog"]
         ExOrder -->|"E2E Binding"| ExNotif["Exchange: Contracts:ICustomerNotification"]
     end
@@ -107,7 +107,7 @@ In microservices, you want **one primary queue per service or aggregate root**, 
 * **Tier 1 (Message Type Exchange)** is owned by the **Message Contract** (Producer domain).
 * **Tier 2 (Endpoint Exchange)** is owned by the **Subscribing Microservice** (Consumer domain).
 
-If the Consumer service redeploys, changes quorum queue parameters, or scales horizontally, it only modifies the Tier 2 $\rightarrow$ Tier 3 queue binding. It never affects the Producer or disruptions other subscribers.
+If the Consumer service redeploys, changes quorum queue parameters, or scales horizontally, it only modifies the Tier 2 → Tier 3 queue binding. It never affects the Producer or disrupts other subscribers.
 
 ---
 
@@ -131,21 +131,21 @@ sequenceDiagram
     participant RMQ as RabbitMQ Broker (AMQP 5672)
 
     Note over App,MT: Phase 1: Registration
-    App->>MT: AddMassTransit() & Register Consumers, Definitions
+    App->>MT: AddMassTransit() and Register Consumers, Definitions
 
     Note over MT,RMQ: Phase 2: Bus Startup (StartAsync)
-    MT->>RMQ: Open AMQP Connection & Channel
+    MT->>RMQ: Open AMQP Connection and Channel
     MT->>RMQ: queue.declare (Physical Queue)
-    MT->>RMQ: queue.declare (<name>_error & <name>_skipped Queues)
+    MT->>RMQ: queue.declare (Fault Queues: _error and _skipped)
     MT->>RMQ: exchange.declare (Tier 2: Endpoint Exchange)
-    MT->>RMQ: queue.bind (Tier 2 Exchange -> Physical Queue)
+    MT->>RMQ: queue.bind (Tier 2 Exchange to Physical Queue)
     MT->>RMQ: exchange.declare (Tier 1: Message Type Exchange)
-    MT->>RMQ: exchange.bind (Tier 1 Exchange -> Tier 2 Exchange)
-    MT->>RMQ: basic.qos (Set PrefetchCount) & basic.consume (Start listening)
+    MT->>RMQ: exchange.bind (Tier 1 Exchange to Tier 2 Exchange)
+    MT->>RMQ: basic.qos (Set PrefetchCount) and basic.consume (Start listening)
 
     Note over App,RMQ: Phase 3: Runtime Message Dispatch
-    App->>RMQ: _publisher.Publish<T>() -> Lands in Tier 1 Exchange
-    RMQ->>RMQ: Evaluates E2E and E2Q bindings -> Drops into Queue
+    App->>RMQ: Publish message to Tier 1 Exchange
+    RMQ->>RMQ: Evaluates E2E and E2Q bindings and routes to Queue
     RMQ->>MT: Pushes message to Consumer thread
     MT->>RMQ: basic.ack (Message processed successfully)
 ```
@@ -160,7 +160,7 @@ When you call `cfg.ConfigureEndpoints(context)`:
   1. Inspects the consumer `IConsumer<OrderPlaced>`.
   2. Creates queue: `order-placed`.
   3. Creates exchange: `Contracts:OrderPlaced` (fanout).
-  4. Automatically binds `Contracts:OrderPlaced` $\rightarrow$ `order-placed` $\rightarrow$ Queue `order-placed`.
+  4. Automatically binds `Contracts:OrderPlaced` → `order-placed` → Queue `order-placed`.
 * **Zero manual configuration needed**.
 
 ---

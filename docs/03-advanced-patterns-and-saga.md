@@ -5,8 +5,8 @@
 ## 1. The Dual-Write Problem & Transactional Outbox
 ### English
 * **The Problem**: In a distributed system, modifying a database and publishing a message are two separate operations.
-  * If the database commit succeeds, but network fails before publishing the message $\rightarrow$ message is lost.
-  * If the message is published, but the database transaction rolls back $\rightarrow$ phantom message / data corruption.
+  * If the database commit succeeds, but network fails before publishing the message → message is lost.
+  * If the message is published, but the database transaction rolls back → phantom message / data corruption.
   * Distributed 2-Phase Commit (2PC) is slow, brittle, and not supported by modern cloud architectures.
 * **The Solution: Transactional Outbox Pattern**:
   * Instead of publishing directly to RabbitMQ, MassTransit writes the outbound message to an `OutboxMessage` table inside the *same SQL database transaction* as your business entity.
@@ -27,8 +27,8 @@ services.AddMassTransit(x =>
 ### বাংলা (Bangla)
 * **Dual-Write সমস্যা কী?**:
   * যখন আপনাকে একই সাথে ডাটাবেজে ডাটা সেভ করতে হয় এবং RabbitMQ-তে মেসেজ পাঠাতে হয়।
-  * ডাটাবেজে সেভ হলো কিন্তু নেটওয়ার্কের কারণে মেসেজ পাবলিশ হলো না $\rightarrow$ মেসেজ ড্রপ এবং ইনকনসিস্টেন্সি।
-  * মেসেজ চলে গেল কিন্তু ডাটাবেজ ট্রানজেকশন ফেইল করে রোলব্যাক করলো $\rightarrow$ ভুল তথ্যের মেসেজ ছড়িয়ে পড়লো।
+  * ডাটাবেজে সেভ হলো কিন্তু নেটওয়ার্কের কারণে মেসেজ পাবলিশ হলো না → মেসেজ ড্রপ এবং ইনকনসিস্টেন্সি।
+  * মেসেজ চলে গেল কিন্তু ডাটাবেজ ট্রানজেকশন ফেইল করে রোলব্যাক করলো → ভুল তথ্যের মেসেজ ছড়িয়ে পড়লো।
 * **সমাধান: Transactional Outbox Pattern**:
   * MassTransit সরাসরি RabbitMQ-তে মেসেজ না পাঠিয়ে, আপনার বিজনেস টেবিলের সাথে একই ডাটাবেজ ট্রানজেকশনে একটি `OutboxMessage` টেবিলে মেসেজটি সেভ করে।
   * ডাটাবেজ কমিট সফল হলে ব্যাকগ্রাউন্ড ওয়ার্কার ওই টেবিল থেকে মেসেজ নিয়ে ব্রোকারে পৌঁছে দেয়।
@@ -82,7 +82,7 @@ services.AddMassTransit(x =>
   ```
 
 ### বাংলা (Bangla)
-* **Saga কী?**: ডিস্ট্রিবিউটেড মাইক্রোসার্ভিসে দীর্ঘমেয়াদী ট্রানজেকশন (Long-running process) ম্যানেজ করার ডিজাইন প্যাটার্ন। যেমন: অর্ডার প্লেস $\rightarrow$ পেমেন্ট কাটা $\rightarrow$ ইনভেন্টরি স্টক আপডেট $\rightarrow$ ডেলিভারি বুকিং।
+* **Saga কী?**: ডিস্ট্রিবিউটেড মাইক্রোসার্ভিসে দীর্ঘমেয়াদী ট্রানজেকশন (Long-running process) ম্যানেজ করার ডিজাইন প্যাটার্ন। যেমন: অর্ডার প্লেস → পেমেন্ট কাটা → ইনভেন্টরি স্টক আপডেট → ডেলিভারি বুকিং।
 * **Orchestration বনাম Choreography**:
   * **Choreography**: প্রতিটি সার্ভিস ইভেন্ট শুনে নিজেই সিদ্ধান্ত নেয়। সিস্টেম জটিল হলে কে কার উপর নির্ভর করছে তা ট্র্যাক করা অসম্ভব হয়ে যায়।
   * **Orchestration (State Machine)**: একজন সেন্ট্রাল ডিরেক্টর বা স্টেট মেশিন থাকে, যে পুরো প্রসেসের অবস্থা (State) ট্র্যাক করে এবং কোনো স্টেপ ফেইল করলে পূর্বের কাজগুলো রোলব্যাক বা ক্ষতিপূরণ (Compensate) করে।

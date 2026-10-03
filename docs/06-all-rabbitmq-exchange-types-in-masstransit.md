@@ -140,13 +140,13 @@ A complete architectural guide and real-world reference implementation for all R
 Open `Order.Service` Swagger at [http://localhost:5003/swagger](http://localhost:5003/swagger):
 
 1. **Test Fanout**:
-   * `POST /Orders/publish-fanout` $\rightarrow$ Look at `Order.Service`, `Inventory.Service`, and `Notification.Service` consoles (all 3 receive it).
+   * `POST /Orders/publish-fanout` → Look at `Order.Service`, `Inventory.Service`, and `Notification.Service` consoles (all 3 receive it).
 2. **Test Direct**:
-   * `POST /Orders/publish-direct?recipient=user@example.com&content=Welcome&channel=email` $\rightarrow$ Consumed by `EmailNotificationConsumer`.
-   * `POST /Orders/publish-direct?recipient=+123456789&content=OTP:1234&channel=sms` $\rightarrow$ Consumed by `SmsNotificationConsumer`.
+   * `POST /Orders/publish-direct?recipient=user@example.com&content=Welcome&channel=email` → Consumed by `EmailNotificationConsumer`.
+   * `POST /Orders/publish-direct?recipient=+123456789&content=OTP:1234&channel=sms` → Consumed by `SmsNotificationConsumer`.
 3. **Test Topic**:
-   * `POST /Orders/publish-topic?orderId=10&amount=99&method=card&status=failed` $\rightarrow$ Consumed by **both** Fraud Detection and Analytics!
-   * `POST /Orders/publish-topic?orderId=11&amount=99&method=card&status=success` $\rightarrow$ Consumed **only** by Analytics!
+   * `POST /Orders/publish-topic?orderId=10&amount=99&method=card&status=failed` → Consumed by **both** Fraud Detection and Analytics!
+   * `POST /Orders/publish-topic?orderId=11&amount=99&method=card&status=success` → Consumed **only** by Analytics!
 4. **Test Headers**:
-   * `POST /Orders/publish-headers?fileName=report.pdf&tier=enterprise` $\rightarrow$ Consumed by `EnterpriseDocumentConsumer`.
-   * `POST /Orders/publish-headers?fileName=report.pdf&tier=standard` $\rightarrow$ Skipped by `EnterpriseDocumentConsumer`.
+   * `POST /Orders/publish-headers?fileName=report.pdf&tier=enterprise` → Consumed by `EnterpriseDocumentConsumer`.
+   * `POST /Orders/publish-headers?fileName=report.pdf&tier=standard` → Skipped by `EnterpriseDocumentConsumer`.

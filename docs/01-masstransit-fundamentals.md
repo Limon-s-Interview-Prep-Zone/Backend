@@ -92,7 +92,7 @@ MassTransit-এ মেসেজ তৈরি করা হয় C# `record` বা
 * E.g., message `Ecommerce.Contracts.OrderSubmitted`:
   * Creates exchange: `Ecommerce.Contracts:OrderSubmitted` (Fanout).
   * Consumer queue: `order-service` or configured queue name.
-  * Binds exchange $\rightarrow$ consumer exchange $\rightarrow$ consumer queue.
+  * Binds exchange → consumer exchange → consumer queue.
 * Benefits: You never have to manually run `channel.QueueDeclare()` or `channel.ExchangeDeclare()`.
 
 ### বাংলা (Bangla)

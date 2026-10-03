@@ -100,7 +100,7 @@ A curated collection of mid-to-senior level interview questions and answers for 
   * Coordinates compensation (e.g., if payment fails, publishes a command to release reserved stock).
 
 #### বাংলা (Bangla)
-* **Saga**: মাইক্রোসার্ভিসে একাধিক সার্ভিসের মধ্যে জটিল ও দীর্ঘমেয়াদী ট্রানজেকশন সমন্বয় করার ডিজাইন প্যাটার্ন (যেমন: ই-কমার্সে অর্ডার $\rightarrow$ স্টক বুকিং $\rightarrow$ পেমেন্ট $\rightarrow$ শিপিং)।
+* **Saga**: মাইক্রোসার্ভিসে একাধিক সার্ভিসের মধ্যে জটিল ও দীর্ঘমেয়াদী ট্রানজেকশন সমন্বয় করার ডিজাইন প্যাটার্ন (যেমন: ই-কমার্সে অর্ডার → স্টক বুকিং → পেমেন্ট → শিপিং)।
 * **Choreography বনাম Orchestration**:
   * **Choreography**: প্রতিটি সার্ভিস একে অপরের ইভেন্ট শুনে নিজেই সিদ্ধান্ত নেয়। সিস্টেম বড় হলে কে কখন কী করছে ট্র্যাক করা অসম্ভব হয়ে যায়।
   * **Orchestration (State Machine)**: একটি সেন্ট্রাল স্টেট মেশিন পুরো ওয়ার্কফ্লো নিয়ন্ত্রণ করে।
@@ -132,7 +132,7 @@ A curated collection of mid-to-senior level interview questions and answers for 
 * **`PrefetchCount`**: How many unacknowledged messages RabbitMQ pushes to the consumer's memory buffer in advance.
 * **`ConcurrentMessageLimit`**: How many messages the consumer executes in parallel on worker threads.
 * **Tuning Rules**:
-  * **Rule of Thumb**: `PrefetchCount >= ConcurrentMessageLimit`. (Typically $2 \times$ `ConcurrentMessageLimit`).
+  * **Rule of Thumb**: `PrefetchCount >= ConcurrentMessageLimit`. (Typically 2x `ConcurrentMessageLimit`).
   * **Fast CPU-bound or lightweight I/O tasks**: Higher values (e.g., Prefetch: 100, Concurrency: 50) for maximum throughput.
   * **Heavy / Slow tasks (e.g., generating PDFs, complex video rendering)**: Low values (e.g., Prefetch: 1–5, Concurrency: 1–2) to prevent one consumer instance from hoarding all messages while other nodes sit idle.
 
