@@ -52,3 +52,17 @@ Welcome to the comprehensive MassTransit theoretical and architectural documenta
    - Sequential Startup Timeline (`queue.declare`, `exchange.declare`, `exchange.bind`)
    - How `ConfigureConsumeTopology = false` and `e.Bind<T>` work
    - Runtime routing execution flow (English & বাংলা)
+
+8. [08. RegistrationExtensions Guide: When, Where & Which One to Use](./08-masstransit-registration-extensions-guide.md)
+   - Role of RegistrationExtensions in DI and MassTransit catalog
+   - `AddConsumer` vs `AddConsumers(Assembly)` vs `AddConsumersFromNamespaceContaining`
+   - Endpoint naming formatters (KebabCase and prefixing)
+   - Advanced registrations (Request Clients, Sagas, Routing Slips)
+   - Decision matrix and interview cheat sheet (English & বাংলা)
+
+9. [09. Ways of Publishing, Sending & Advanced Dispatch Patterns](./09-publishing-sending-and-dispatch-patterns.md)
+   - `IPublishEndpoint` vs `ConsumeContext.Publish` vs `IBus.Publish` vs `PublishBatch`
+   - `ISendEndpointProvider` vs `EndpointConvention.Map<T>` for clean commands
+   - Request/Response (`IRequestClient<T>`), Scheduling (`IMessageScheduler`), and Deferral (`context.Defer`)
+   - Routing Slips orchestration (`RoutingSlipBuilder`)
+   - The Golden Rule: Inside vs Outside Consumer Context (Transactional Outbox & Tracing)
