@@ -38,3 +38,10 @@ Welcome to the comprehensive MassTransit theoretical and architectural documenta
    - Order.Service configuration (`Startup.cs` & `OrdersController.cs`)
    - Inventory.Service configuration (`Startup.cs` & consumers)
    - Testing Pub/Sub, Commands, and RPC step-by-step
+
+6. [06. All RabbitMQ Exchange Types in MassTransit Guide](file:///Users/limon/interview/Backend/docs/06-all-rabbitmq-exchange-types-in-masstransit.md)
+   - Architectural matrix of all 4 exchange types
+   - Fanout Exchange (Global Broadcast)
+   - Direct Exchange (Exact RoutingKey matching for SMS/Email)
+   - Topic Exchange (Pattern matching with `*` and `#` wildcards for Payment/Fraud)
+   - Headers Exchange (AMQP Header attribute routing for Enterprise tiers)
